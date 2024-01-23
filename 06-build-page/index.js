@@ -10,9 +10,9 @@ const projectAssetsPath = path.join(projectPath, 'assets');
 async function bundleProject() {
   await fs.rm(projectPath, { recursive: true, force: true });
   await fs.mkdir(projectPath);
-  await copyAssets(assetsPath, projectAssetsPath);
-  await mergeStyles();
-  await modifyTemplate();
+  copyAssets(assetsPath, projectAssetsPath);
+  mergeStyles();
+  modifyTemplate();
 }
 async function copyAssets(originalPath, copyPath) {
   await fs.mkdir(copyPath);
@@ -45,7 +45,7 @@ async function modifyTemplate() {
   const files = await fs.readdir(componentsPath);
   for (const filename of files) {
     const filePath = path.join(componentsPath, filename);
-    const data = await fs.readFile(filePath, 'utf-8');
+    const data = await fs.readFile(filePath);
     const componentName = `{{${path.basename(
       filePath,
       path.extname(filePath),
