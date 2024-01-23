@@ -1,19 +1,18 @@
 const path = require('path');
-const fs = require('fs');
-const output = fs.createWriteStream(
-  path.join(__dirname, 'project-dist', 'bundle.css'),
-);
+const fs = require('fs').promises;
+const bundlePath = path.join(__dirname, 'project-dist', 'bundle.css');
 const stylesPath = path.join(__dirname, 'styles');
-fs.readdir(stylesPath, (error, files) => {
-  if (error) return console.log(error.message);
-  files.forEach((filename) => {
+
+async function mergeStyles() {
+  await fs.rm(bundlePath, { force: true });
+  const files = await fs.readdir(stylesPath);
+  for (const filename of files) {
     const filePath = path.join(stylesPath, filename);
-    fs.stat(filePath, (error, stats) => {
-      if (error) return console.log(error.message);
-      if (stats.isFile() && path.extname(filePath).split('.')[1] === 'css') {
-        const input = fs.createReadStream(filePath);
-        input.pipe(output);
-      }
-    });
-  });
-});
+    const stats = await fs.stat(filePath);
+    if (stats.isFile() && path.extname(filePath).split('.')[1] === 'css') {
+      const style = await fs.readFile(filePath);
+      await fs.appendFile(bundlePath, style);
+    }
+  }
+}
+mergeStyles();
